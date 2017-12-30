@@ -5,7 +5,11 @@ from keras_squeezenet import SqueezeNet
 from keras.applications.imagenet_utils import preprocess_input, decode_predictions
 from keras.preprocessing import image
 import sh
+import os
 import sys
+from PIL import Image
+from PIL import ImageFont
+from PIL import ImageDraw
 
 inputFile = sys.argv[1]
 
@@ -20,7 +24,22 @@ preds = decode_predictions(model.predict(x))[0]
 most_likely = preds[0]
 most_likely_object = most_likely[1]
 most_likely_percent = most_likely[2]
+
+
+fontFile = '/Users/tmoon/Code/MLResearch/fonts/abel-regular.ttf'
+
+base = Image.open(inputFile).convert('RGBA')
+txt = Image.new('RGBA', base.size, (255,255,255,0))
+
+fnt = ImageFont.truetype(fontFile,40)
+
+d = ImageDraw.Draw(txt)
+
+d.text((0,0), most_likely_object + ' - {percent:.2%}'.format(percent=most_likely_percent), font=fnt, fill=(0,0,0,255))
+
+out = Image.alpha_composite(base,txt)
+out.show()
+
 print '+++++++++++++++++++++++++++++++++++++++++++\n\n'
-print 'I am {percent:.2%} certain that image is a '.format(percent=most_likely_percent) + most_likely_object
-sh.open(inputFile)
+print preds
 print '\n\n+++++++++++++++++++++++++++++++++++++++++++'
